@@ -49,6 +49,7 @@ var nanonautIsInTheAir = true;
 var cameraX = 0;
 var cameraY = 0;
 var gameFrameCounter = 0;
+var bushXCoordinates = [550,750,1000,1200]
 
 var nanonautFrameNr = 0;
 
@@ -150,7 +151,9 @@ function draw(){
     c.fillRect(0, GROUND_Y-40, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y + 40);
 
     // Draw the bushes
-    c.drawImage(bush1Image, 550, GROUND_Y-100);
+    for (var i = 0; i < bushXCoordinates.length; i++){
+        c.drawImage(bush1Image, bushXCoordinates[i] -cameraX, GROUND_Y - 100 - cameraY);
+    }
 
     // Draw the Nanonaut.
     // c.drawImage(nanonautImage, nanonautX-cameraX, nanonautY-cameraY);
