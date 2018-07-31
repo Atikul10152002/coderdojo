@@ -1,6 +1,8 @@
 // CONSTANS
-
-var FULLSCREEN = true
+var FULLSCREEN = false
+function fullscreen_F(){
+    var FULLSCREEN = true
+}
 
 if (FULLSCREEN === true){
     var CANVAS_WIDTH = window.innerWidth -15
@@ -47,7 +49,6 @@ if (FULLSCREEN === true){
     var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX *2 
 }
 
-console.log(nanonautX)
 var MAX_DISTANCE_BETWEEN_ROBOTS = CANVAS_WIDTH
 var MAX_ACTIVE_ROBOTS = 3
 
@@ -277,7 +278,6 @@ function updateRobots(){
             robotCollsionRectangle.width,
             robotCollsionRectangle.height
         )){
-            console.log("OUCH!")
             nanonautTouchedARobot = true
         }
 
@@ -295,7 +295,6 @@ function updateRobots(){
     while (robotIndex < robotData.length){
         if (robotData[robotIndex].x < cameraX - ROBOT_WIDTH){
             robotData.splice(robotIndex, 1)
-            console.log("Robot removed!")
         } else {
             robotIndex += 1
         }
