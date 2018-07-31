@@ -21,6 +21,10 @@ var NANONAUT_X_SPEED = 5
 var NANONAUT_JUMP_SPEED = 20
 var NANONAUT_ANIMATION_SPEED = 3
 
+var ROBOT_HEIGHT = 139
+var ROBOT_WIDTH = 141
+var ROBOT_X_SPEED = 4
+
 var BACKGROUND_WIDTH = 1000
 
 var W_KEY = 87
@@ -30,6 +34,15 @@ var NANONAUT_NR_ANIMATION_FRAMES = 7
 var ROBOT_ANIMATION_SPEED = 5
 var ROBOT_NR_ANIMATION_FRAMES = 9
 
+if (FULLSCREEN === true){
+    var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX 
+} else{
+    var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX *2 
+}
+
+console.log(nanonautX)
+var MAX_DISTANCE_BETWEEN_ROBOTS = CANVAS_WIDTH
+var MAX_ACTIVE_ROBOTS = 3
 
 // SETUP
 
@@ -64,12 +77,13 @@ var robotSpritesheet = {
     image: robotImage
 }
 
-var robotData = [{
-    x: 400,
-    y: GROUND_Y - ROBOT_HEIGHT,
-    frameNr: 0
-}]
+var robotData = []
 
+// var robotData = [{
+//     x: 400,
+//     y: GROUND_Y - ROBOT_HEIGHT,
+//     frameNr: 0
+// }]
 
 var nanonautSpriteSheet = {
     nrFramesPerRow: 5,
@@ -89,13 +103,26 @@ var nanonautY = 40
 var cameraX = 0
 var cameraY = 0
 
-var ROBOT_HEIGHT = 139
-var ROBOT_WIDTH = 141
-
 var wIsPressed
 var spaceIsPressed
 
 var bushData = generateBush()
+
+// collision rectangle
+var nanonautCollisionRectangle = {
+    xOffset: 60,
+    yOffset: 20,
+    width: 50,
+    height: 200
+}
+
+var robotCollsionRectangle = {
+    xOffset: 50,
+    yOffset: 20,
+    width: 50,
+    height: 100
+}
+
 
 // event listeners
 window.addEventListener("keydown", onKeyDown)
@@ -210,6 +237,20 @@ function update() {
 function updateRobots(){
     // Move and animate robots.
     for (var i = 0; i< robotData.length; i++){
+        if (doesNanonautOverlapRobot (
+            nanonautX + nanonautCollisionRectangle.xOffset,
+            nanonautY + nanonautCollisionRectangle.yOffset,
+            nanonautCollisionRectangle.width,
+            nanonautCollisionRectangle.height,
+            robotData[i].x + robotCollsionRectangle.xOffset,
+            robotData[i].y = robotCollsionRectangle.yOffset,
+            robotCollsionRectangle.width,
+            robotCollsionRectangle.height
+        )){
+            console.log("OUCH!")
+        }
+
+        robotData[i].x -= ROBOT_X_SPEED
         if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0){
             robotData[i].frameNr += 1
             if (robotData[i].frameNr >= ROBOT_NR_ANIMATION_FRAMES){
@@ -217,6 +258,54 @@ function updateRobots(){
             }
         }
     }
+
+    // Remove robots htat have gone off-screen
+    var robotIndex = 0
+    while (robotIndex < robotData.length){
+        if (robotData[robotIndex].x < cameraX - ROBOT_WIDTH){
+            robotData.splice(robotIndex, 1)
+            console.log("Robot removed!")
+        } else {
+            robotIndex += 1
+        }
+    }
+
+    if (robotData.length < MAX_ACTIVE_ROBOTS){
+        var lastRobotX = CANVAS_WIDTH
+        if (robotData.length > 0){
+            var lastRobotX = robotData[robotData.length -1].x }
+        var newRobotX = lastRobotX + MIN_DISTANCE_BETWEEN_ROBOTS + Math.random() * 
+        (MAX_DISTANCE_BETWEEN_ROBOTS - MIN_DISTANCE_BETWEEN_ROBOTS)
+        robotData.push({
+            x: newRobotX,
+            y: GROUND_Y - ROBOT_HEIGHT,
+            frameNr: 0
+        })
+    }
+}
+
+function doesNanonautOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robotNearX, robotFarX){
+    var nanonautOverlapsNearRobotEdge = (nanonautFarX >= robotNearX) && (nanonautFarX <= robotFarX)
+    var nanonautOverlapsFarRobotEdge = (nanonautNearX >= robotNearX) && (nanonautNearX <= robotFarX)
+    var nanonautOverlapsEntireRobot = (nanonautNearX <= robotNearX) && (nanonautFarX >= robotFarX)
+
+    return nanonautOverlapsEntireRobot || nanonautOverlapsFarRobotEdge || nanonautOverlapsNearRobotEdge
+}
+
+function doesNanonautOverlapRobot(nanonautX, nanonautY, nanonautWidth, nanonautHeight, robotX, robotY, robotWidth, robotHeight){
+    var nanonautOverlapsRobotOnXAxis = doesNanonautOverlapRobotAlongOneAxis(
+        nanonautX, 
+        nanonautX + nanonautWidth,
+        robotX,
+        robotX + robotWidth
+    )
+    var nanonautOverlapsRobotOnYAxis = doesNanonautOverlapRobotAlongOneAxis(
+        nanonautY, 
+        nanonautY + nanonautHeight,
+        robotY,
+        robotY + robotHeight
+    )
+    return nanonautOverlapsRobotOnXAxis && nanonautOverlapsRobotOnYAxis
 }
 
 // DRAWING
