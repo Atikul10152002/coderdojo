@@ -1,13 +1,10 @@
 // CONSTANS
-var FULLSCREEN = false
-function fullscreen_F(){
-    var FULLSCREEN = true
-}
+var FULLSCREEN = true
 
-if (FULLSCREEN === true){
-    var CANVAS_WIDTH = window.innerWidth -15
-    var CANVAS_HEIGHT = window.innerHeight -20
-} else{
+if (FULLSCREEN) {
+    var CANVAS_WIDTH = window.innerWidth - 15
+    var CANVAS_HEIGHT = window.innerHeight - 20
+} else {
     var CANVAS_WIDTH = 800
     var CANVAS_HEIGHT = 600
 }
@@ -42,11 +39,10 @@ var SCREENSHAKE_RADIUS = 30
 var PLAY_GAME_MODE = 0
 var GAME_OVER_GAME_MODE = 1
 
-
-if (FULLSCREEN === true){
-    var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX 
-} else{
-    var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX *2 
+if (FULLSCREEN) {
+    var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX
+} else {
+    var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX * 2
 }
 
 var MAX_DISTANCE_BETWEEN_ROBOTS = CANVAS_WIDTH
@@ -63,19 +59,19 @@ canvas.height = CANVAS_HEIGHT
 
 // Loading Images
 var nanonautImage = new Image()
-nanonautImage.src = "assets/animatedNanonaut.png"
+nanonautImage.src = "compressed_assets/animatedNanonaut.png"
 
 var backgroundImage = new Image()
-backgroundImage.src = "assets/background.png"
+backgroundImage.src = "compressed_assets/background.png"
 
 var bush1Image = new Image()
-bush1Image.src = "assets/bush1.png"
+bush1Image.src = "compressed_assets/bush1.png"
 
 var bush2Image = new Image()
-bush2Image.src = "assets/bush2.png"
+bush2Image.src = "compressed_assets/bush2.png"
 
 var robotImage = new Image()
-robotImage.src = 'assets/animatedRobot.png'
+robotImage.src = 'compressed_assets/animatedRobot.png'
 
 // spriteSheet properties
 var robotSpritesheet = {
@@ -85,13 +81,14 @@ var robotSpritesheet = {
     image: robotImage
 }
 
+// empty array to store the robot index
 var robotData = []
 
-// var robotData = [{
-//     x: 400,
-//     y: GROUND_Y - ROBOT_HEIGHT,
-//     frameNr: 0
-// }]
+var robotData = [{
+    x: 400,
+    y: GROUND_Y - ROBOT_HEIGHT,
+    frameNr: 0
+}]
 
 var nanonautSpriteSheet = {
     nrFramesPerRow: 5,
@@ -99,7 +96,6 @@ var nanonautSpriteSheet = {
     spriteHeight: NANONAUT_HEIGHT,
     image: nanonautImage
 }
-
 
 // Global Varibles
 var gameMode = PLAY_GAME_MODE
@@ -137,7 +133,6 @@ var robotCollsionRectangle = {
     height: 100
 }
 
-
 // event listeners
 window.addEventListener("keydown", onKeyDown)
 window.addEventListener("keyup", onKeyUp)
@@ -147,12 +142,12 @@ window.addEventListener("load", start)
 function onKeyDown(event) {
     currentKEY = event.keyCode
     switch (currentKEY) {
-        case SPACE_KEY:
-            spaceIsPressed = true
-            break
-        case W_KEY:
-            wIsPressed = true
-            break
+    case SPACE_KEY:
+        spaceIsPressed = true
+        break
+    case W_KEY:
+        wIsPressed = true
+        break
     }
 }
 
@@ -160,12 +155,12 @@ function onKeyDown(event) {
 function onKeyUp(event) {
     currentKEY = event.keyCode
     switch (currentKEY) {
-        case SPACE_KEY:
-            spaceIsPressed = false
-            break
-        case W_KEY:
-            wIsPressed = false
-            break
+    case SPACE_KEY:
+        spaceIsPressed = false
+        break
+    case W_KEY:
+        wIsPressed = false
+        break
     }
 }
 // Starts the mainloop
@@ -206,10 +201,10 @@ function mainloop() {
 
 // PLAYER INPUT
 
-
 // UPDATING
 function update() {
-    if (gameMode != PLAY_GAME_MODE) return;
+    if (gameMode != PLAY_GAME_MODE)
+        return;
 
     // Jump action
     gameFrameCounter += 1
@@ -250,62 +245,52 @@ function update() {
     // Update Robots
     screenshake = false
     var nanonautTouchedARobot = updateRobots()
-    if (nanonautTouchedARobot){
+    if (nanonautTouchedARobot) {
         screenshake = true
-        if (nanonautHealth > 0){
+        if (nanonautHealth > 0) {
             nanonautHealth -= 1
-        } 
+        }
     }
 
     // Check if game is over
-    if (nanonautHealth<= 0){
+    if (nanonautHealth <= 0) {
         gameMode = GAME_OVER_GAME_MODE
         screenshake = false
     }
 }
 
-function updateRobots(){
+function updateRobots() {
     // Move and animate robots.
     var nanonautTouchedARobot = false
-    for (var i = 0; i< robotData.length; i++){
-        if (doesNanonautOverlapRobot (
-            nanonautX + nanonautCollisionRectangle.xOffset,
-            nanonautY + nanonautCollisionRectangle.yOffset,
-            nanonautCollisionRectangle.width,
-            nanonautCollisionRectangle.height,
-            robotData[i].x + robotCollsionRectangle.xOffset,
-            robotData[i].y + robotCollsionRectangle.yOffset,
-            robotCollsionRectangle.width,
-            robotCollsionRectangle.height
-        )){
+    for (var i = 0; i < robotData.length; i++) {
+        if (doesNanonautOverlapRobot(nanonautX + nanonautCollisionRectangle.xOffset, nanonautY + nanonautCollisionRectangle.yOffset, nanonautCollisionRectangle.width, nanonautCollisionRectangle.height, robotData[i].x + robotCollsionRectangle.xOffset, robotData[i].y + robotCollsionRectangle.yOffset, robotCollsionRectangle.width, robotCollsionRectangle.height)) {
             nanonautTouchedARobot = true
         }
-
         robotData[i].x -= ROBOT_X_SPEED
-        if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0){
+        if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0) {
             robotData[i].frameNr += 1
-            if (robotData[i].frameNr >= ROBOT_NR_ANIMATION_FRAMES){
+            if (robotData[i].frameNr >= ROBOT_NR_ANIMATION_FRAMES) {
                 robotData[0].frameNr = 0
             }
         }
     }
 
-    // Remove robots htat have gone off-screen
+    // Remove robots that have gone off-screen
     var robotIndex = 0
-    while (robotIndex < robotData.length){
-        if (robotData[robotIndex].x < cameraX - ROBOT_WIDTH){
+    while (robotIndex < robotData.length) {
+        if (robotData[robotIndex].x < cameraX - ROBOT_WIDTH) {
             robotData.splice(robotIndex, 1)
         } else {
             robotIndex += 1
         }
     }
 
-    if (robotData.length < MAX_ACTIVE_ROBOTS){
+    if (robotData.length < MAX_ACTIVE_ROBOTS) {
         var lastRobotX = CANVAS_WIDTH
-        if (robotData.length > 0){
-            var lastRobotX = robotData[robotData.length -1].x }
-        var newRobotX = lastRobotX + MIN_DISTANCE_BETWEEN_ROBOTS + Math.random() * 
-        (MAX_DISTANCE_BETWEEN_ROBOTS - MIN_DISTANCE_BETWEEN_ROBOTS)
+        if (robotData.length > 0) {
+            var lastRobotX = robotData[robotData.length - 1].x
+        }
+        var newRobotX = lastRobotX + MIN_DISTANCE_BETWEEN_ROBOTS + Math.random() * (MAX_DISTANCE_BETWEEN_ROBOTS - MIN_DISTANCE_BETWEEN_ROBOTS)
         robotData.push({
             x: newRobotX,
             y: GROUND_Y - ROBOT_HEIGHT,
@@ -316,7 +301,7 @@ function updateRobots(){
     return nanonautTouchedARobot
 }
 
-function doesNanonautOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robotNearX, robotFarX){
+function doesNanonautOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robotNearX, robotFarX) {
     var nanonautOverlapsNearRobotEdge = (nanonautFarX >= robotNearX) && (nanonautFarX <= robotFarX)
     var nanonautOverlapsFarRobotEdge = (nanonautNearX >= robotNearX) && (nanonautNearX <= robotFarX)
     var nanonautOverlapsEntireRobot = (nanonautNearX <= robotNearX) && (nanonautFarX >= robotFarX)
@@ -324,19 +309,9 @@ function doesNanonautOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robot
     return nanonautOverlapsEntireRobot || nanonautOverlapsFarRobotEdge || nanonautOverlapsNearRobotEdge
 }
 
-function doesNanonautOverlapRobot(nanonautX, nanonautY, nanonautWidth, nanonautHeight, robotX, robotY, robotWidth, robotHeight){
-    var nanonautOverlapsRobotOnXAxis = doesNanonautOverlapRobotAlongOneAxis(
-        nanonautX, 
-        nanonautX + nanonautWidth,
-        robotX,
-        robotX + robotWidth
-    )
-    var nanonautOverlapsRobotOnYAxis = doesNanonautOverlapRobotAlongOneAxis(
-        nanonautY, 
-        nanonautY + nanonautHeight,
-        robotY,
-        robotY + robotHeight
-    )
+function doesNanonautOverlapRobot(nanonautX, nanonautY, nanonautWidth, nanonautHeight, robotX, robotY, robotWidth, robotHeight) {
+    var nanonautOverlapsRobotOnXAxis = doesNanonautOverlapRobotAlongOneAxis(nanonautX, nanonautX + nanonautWidth, robotX, robotX + robotWidth)
+    var nanonautOverlapsRobotOnYAxis = doesNanonautOverlapRobotAlongOneAxis(nanonautY, nanonautY + nanonautHeight, robotY, robotY + robotHeight)
     return nanonautOverlapsRobotOnXAxis && nanonautOverlapsRobotOnYAxis
 }
 
@@ -346,7 +321,7 @@ function draw() {
     var shakenCameraX = cameraX
     var shakenCameraY = cameraY
 
-    if (screenshake){
+    if (screenshake) {
         shakenCameraX += (Math.random() - .5) * SCREENSHAKE_RADIUS
         shakenCameraY += (Math.random() - .5) * SCREENSHAKE_RADIUS
     }
@@ -360,14 +335,7 @@ function draw() {
         var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow
         var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth
         var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight
-        c.drawImage(
-            spriteSheet.image,
-            spriteSheetX, spriteSheetY,
-            spriteSheet.spriteWidth,
-            spriteSheet.spriteHeight,
-            screenX, screenY,
-            spriteSheet.spriteWidth,
-            spriteSheet.spriteHeight)
+        c.drawImage(spriteSheet.image, spriteSheetX, spriteSheetY, spriteSheet.spriteWidth, spriteSheet.spriteHeight, screenX, screenY, spriteSheet.spriteWidth, spriteSheet.spriteHeight)
     }
 
     // Draw the sky
@@ -378,10 +346,8 @@ function draw() {
     var backgroundX = -(shakenCameraX % BACKGROUND_WIDTH) - 150
     c.drawImage(backgroundImage, backgroundX, -210)
     c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH, -210)
-    if (FULLSCREEN === true){
+    if (FULLSCREEN === true)
         c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH + BACKGROUND_WIDTH, -210)
-    }
-    
 
     // Draw the ground
     c.fillStyle = "forestGreen"
@@ -393,14 +359,12 @@ function draw() {
     }
 
     // Draw the robots
-    for (var i=0; i< robotData.length; i++){
-        drawAnimatedSprite(robotData[i].x - shakenCameraX,
-        robotData[i].y - cameraY, robotData[i].frameNr, robotSpritesheet)
+    for (var i = 0; i < robotData.length; i++) {
+        drawAnimatedSprite(robotData[i].x - shakenCameraX, robotData[i].y - cameraY, robotData[i].frameNr, robotSpritesheet)
     }
 
     // Draw the Nanonaut
-    drawAnimatedSprite(nanonautX-shakenCameraX, nanonautY-cameraY,
-    nanonautFrameNr, nanonautSpriteSheet)
+    drawAnimatedSprite(nanonautX - shakenCameraX, nanonautY - cameraY, nanonautFrameNr, nanonautSpriteSheet)
 
     // Scoring
     var nanonautDistance = nanonautX / 50
@@ -410,21 +374,33 @@ function draw() {
 
     // Draw health bar
     c.fillStyle = 'red'
-    c.fillRect(400, 10, nanonautHealth / NANONAUT_MAX_HEALTH * 380, 20)
     c.strokeStyle = 'red'
-    c.strokeRect(400, 10, 380, 20)
+    
+    if (FULLSCREEN) {
+        c.fillRect(CANVAS_WIDTH - 400, 10, nanonautHealth / NANONAUT_MAX_HEALTH * 380, 25)
+        c.strokeRect(CANVAS_WIDTH - 400, 10, 380, 25)
 
-        // If the ame is over draw GAME OVER
-    if (gameMode == GAME_OVER_GAME_MODE){
+    } else {
+        c.fillRect(400, 10, nanonautHealth / NANONAUT_MAX_HEALTH * 380, 20)
+        c.strokeRect(400, 10, 380, 20)
+    }
+
+    // If the ame is over draw GAME OVER
+
+    if (gameMode == GAME_OVER_GAME_MODE) {
         c.fillStyle = "black"
         c.font = '96px sans-serif'
-        c.fillText('GAME OVER!', 120, 300)
+
+        if (FULLSCREEN)
+            c.fillText('GAME OVER!', (CANVAS_WIDTH / 2) - (630 / 2), CANVAS_HEIGHT / 2)
+        else
+            c.fillText('GAME OVER!', 120, CANVAS_HEIGHT / 2)
+
     }
 }
 
 // CREDITS
-console.log(
-    "     NANONAUT PROJECT CRATED BY - MOHAMMAD ISLAM \n\
+console.log("     NANONAUT PROJECT CRATED BY - MOHAMMAD ISLAM \n\
             Create using CoderDojo <NAND>\n\
                 Create with <CODE>\n\n\
                 MAKE YOUR OWN GAME\n\
