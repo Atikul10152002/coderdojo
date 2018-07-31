@@ -1,10 +1,10 @@
 // CONSTANS
 
-var FULLSCREEN = false
+var FULLSCREEN = true
 
 if (FULLSCREEN === true){
-    var CANVAS_WIDTH = window.innerWidth
-    var CANVAS_HEIGHT = window.innerHeight
+    var CANVAS_WIDTH = window.innerWidth -15
+    var CANVAS_HEIGHT = window.innerHeight -20
 } else{
     var CANVAS_WIDTH = 800
     var CANVAS_HEIGHT = 600
@@ -20,6 +20,7 @@ var NANONAUT_Y_ACCELERATION = 1
 var NANONAUT_X_SPEED = 5
 var NANONAUT_JUMP_SPEED = 20
 var NANONAUT_ANIMATION_SPEED = 3
+var NANONAUT_MAX_HEALTH = 100
 
 var ROBOT_HEIGHT = 139
 var ROBOT_WIDTH = 141
@@ -33,6 +34,12 @@ var SPACE_KEY = 32
 var NANONAUT_NR_ANIMATION_FRAMES = 7
 var ROBOT_ANIMATION_SPEED = 5
 var ROBOT_NR_ANIMATION_FRAMES = 9
+
+var SCREENSHAKE_RADIUS = 30
+
+var PLAY_GAME_MODE = 0
+var GAME_OVER_GAME_MODE = 1
+
 
 if (FULLSCREEN === true){
     var MIN_DISTANCE_BETWEEN_ROBOTS = nanonautX 
@@ -94,6 +101,8 @@ var nanonautSpriteSheet = {
 
 
 // Global Varibles
+var gameMode = PLAY_GAME_MODE
+
 var nanonautIsInTheAir = true
 var gameFrameCounter = 0
 var nanonautFrameNr = 0
@@ -103,8 +112,12 @@ var nanonautY = 40
 var cameraX = 0
 var cameraY = 0
 
+var nanonautHealth = NANONAUT_MAX_HEALTH
+
 var wIsPressed
 var spaceIsPressed
+
+var screenshake = false
 
 var bushData = generateBush()
 
@@ -157,6 +170,7 @@ function onKeyUp(event) {
 // Starts the mainloop
 function start() {
     window.requestAnimationFrame(mainloop)
+
 }
 
 // Functions for random functionality
@@ -194,6 +208,8 @@ function mainloop() {
 
 // UPDATING
 function update() {
+    if (gameMode != PLAY_GAME_MODE) return;
+
     // Jump action
     gameFrameCounter += 1
     nanonautX += NANONAUT_X_SPEED
@@ -231,11 +247,25 @@ function update() {
     }
 
     // Update Robots
-    updateRobots()
+    screenshake = false
+    var nanonautTouchedARobot = updateRobots()
+    if (nanonautTouchedARobot){
+        screenshake = true
+        if (nanonautHealth > 0){
+            nanonautHealth -= 1
+        } 
+    }
+
+    // Check if game is over
+    if (nanonautHealth<= 0){
+        gameMode = GAME_OVER_GAME_MODE
+        screenshake = false
+    }
 }
 
 function updateRobots(){
     // Move and animate robots.
+    var nanonautTouchedARobot = false
     for (var i = 0; i< robotData.length; i++){
         if (doesNanonautOverlapRobot (
             nanonautX + nanonautCollisionRectangle.xOffset,
@@ -243,11 +273,12 @@ function updateRobots(){
             nanonautCollisionRectangle.width,
             nanonautCollisionRectangle.height,
             robotData[i].x + robotCollsionRectangle.xOffset,
-            robotData[i].y = robotCollsionRectangle.yOffset,
+            robotData[i].y + robotCollsionRectangle.yOffset,
             robotCollsionRectangle.width,
             robotCollsionRectangle.height
         )){
             console.log("OUCH!")
+            nanonautTouchedARobot = true
         }
 
         robotData[i].x -= ROBOT_X_SPEED
@@ -282,6 +313,8 @@ function updateRobots(){
             frameNr: 0
         })
     }
+
+    return nanonautTouchedARobot
 }
 
 function doesNanonautOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robotNearX, robotFarX){
@@ -310,6 +343,15 @@ function doesNanonautOverlapRobot(nanonautX, nanonautY, nanonautWidth, nanonautH
 
 // DRAWING
 function draw() {
+    // shake screen if necessay
+    var shakenCameraX = cameraX
+    var shakenCameraY = cameraY
+
+    if (screenshake){
+        shakenCameraX += (Math.random() - .5) * SCREENSHAKE_RADIUS
+        shakenCameraY += (Math.random() - .5) * SCREENSHAKE_RADIUS
+    }
+
     // Clear Screen
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
@@ -334,13 +376,12 @@ function draw() {
     c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40)
 
     // Draw the background
-    var backgroundX = -(cameraX % BACKGROUND_WIDTH) - 150
+    var backgroundX = -(shakenCameraX % BACKGROUND_WIDTH) - 150
     c.drawImage(backgroundImage, backgroundX, -210)
     c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH, -210)
     if (FULLSCREEN === true){
         c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH + BACKGROUND_WIDTH, -210)
     }
-    
     
 
     // Draw the ground
@@ -349,19 +390,37 @@ function draw() {
 
     // Draw the bushes
     for (var i = 0; i < bushData.length; i++) {
-        c.drawImage(bushData[i].image, bushData[i].x - cameraX, GROUND_Y - bushData[i].y - cameraY)
+        c.drawImage(bushData[i].image, bushData[i].x - shakenCameraX, GROUND_Y - bushData[i].y - cameraY)
     }
 
     // Draw the robots
     for (var i=0; i< robotData.length; i++){
-        drawAnimatedSprite(robotData[i].x - cameraX,
+        drawAnimatedSprite(robotData[i].x - shakenCameraX,
         robotData[i].y - cameraY, robotData[i].frameNr, robotSpritesheet)
     }
 
     // Draw the Nanonaut
-    drawAnimatedSprite(nanonautX-cameraX, nanonautY-cameraY,
+    drawAnimatedSprite(nanonautX-shakenCameraX, nanonautY-cameraY,
     nanonautFrameNr, nanonautSpriteSheet)
 
+    // Scoring
+    var nanonautDistance = nanonautX / 50
+    c.fillStyle = 'black'
+    c.font = '48px sans-serif'
+    c.fillText(nanonautDistance.toFixed(0) + 'm', 20, 40)
+
+    // Draw health bar
+    c.fillStyle = 'red'
+    c.fillRect(400, 10, nanonautHealth / NANONAUT_MAX_HEALTH * 380, 20)
+    c.strokeStyle = 'red'
+    c.strokeRect(400, 10, 380, 20)
+
+        // If the ame is over draw GAME OVER
+    if (gameMode == GAME_OVER_GAME_MODE){
+        c.fillStyle = "black"
+        c.font = '96px sans-serif'
+        c.fillText('GAME OVER!', 120, 300)
+    }
 }
 
 // CREDITS
