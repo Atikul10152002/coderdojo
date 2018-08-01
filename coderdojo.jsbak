@@ -64,7 +64,7 @@ var wIsPressed, spaceIsPressed, robotSpritesheet = {
     spriteHeight: NANONAUT_HEIGHT,
     image: nanonautImage
 }), gameMode = PLAY_GAME_MODE, nanonautIsInTheAir = !0, gameFrameCounter = 0, nanonautFrameNr = 0, nanonautYSpeed = 0, nanonautY = (nanonautX = 50,
-40), cameraX = 0, cameraY = 0, nanonautHealth = NANONAUT_MAX_HEALTH, screenshake = !1, bushData = gBush(), nanonautCollisionRectangle = {
+40), cameraX = 0, cameraY = 0, nanonautHealth = NANONAUT_MAX_HEALTH, screenshake = !1, bushData = generateBush(), nanonautCollisionRectangle = {
     xOffset: 60,
     yOffset: 20,
     width: 50,
@@ -76,7 +76,7 @@ var wIsPressed, spaceIsPressed, robotSpritesheet = {
     height: 100
 };
 
-function oKD(a) {
+function onKeyDown(a) {
     switch (currentKEY = a.keyCode,
     currentKEY) {
     case SPACE_KEY:
@@ -87,7 +87,7 @@ function oKD(a) {
     }
 }
 
-function oKU(a) {
+function onKeyUp(a) {
     switch (currentKEY = a.keyCode,
     currentKEY) {
     case SPACE_KEY:
@@ -110,7 +110,7 @@ function choose(a) {
     return a[Math.floor(Math.random() * a.length)]
 }
 
-function gBush() {
+function generateBush() {
     for (var a = [], e = 0; e < 10; e++)
         a.push({
             image: choose([bush1Image, bush2Image]),
@@ -149,7 +149,7 @@ function update() {
 
 function updateRobots() {
     for (var a = !1, e = 0; e < robotData.length; e++)
-        dNOR(nanonautX + nanonautCollisionRectangle.xOffset, nanonautY + nanonautCollisionRectangle.yOffset, nanonautCollisionRectangle.width, nanonautCollisionRectangle.height, robotData[e].x + robotCollsionRectangle.xOffset, robotData[e].y + robotCollsionRectangle.yOffset, robotCollsionRectangle.width, robotCollsionRectangle.height) && (a = !0),
+        doesNanonautOverlapRobot(nanonautX + nanonautCollisionRectangle.xOffset, nanonautY + nanonautCollisionRectangle.yOffset, nanonautCollisionRectangle.width, nanonautCollisionRectangle.height, robotData[e].x + robotCollsionRectangle.xOffset, robotData[e].y + robotCollsionRectangle.yOffset, robotCollsionRectangle.width, robotCollsionRectangle.height) && (a = !0),
         robotData[e].x -= ROBOT_X_SPEED + SPEEDANDDAMAGEMULTIPLYER_V,
         SPEEDANDDAMAGEMULTIPLYER_V += SPEEDANDDAMAGEMULTIPLYER,
         gameFrameCounter % ROBOT_ANIMATION_SPEED == 0 && (robotData[e].frameNr += 1,
@@ -170,13 +170,13 @@ function updateRobots() {
     return a
 }
 
-function dNORAOA(a, e, n, t) {
+function doesNanonautOverlapRobotAlongOneAxis(a, e, n, t) {
     return a <= n && t <= e || n <= a && a <= t || n <= e && e <= t
 }
 
-function dNOR(a, e, n, t, o, r, A, s) {
-    var N = dNORAOA(a, a + n, o, o + A)
-      , E = dNORAOA(e, e + t, r, r + s);
+function doesNanonautOverlapRobot(a, e, n, t, o, r, A, s) {
+    var N = doesNanonautOverlapRobotAlongOneAxis(a, a + n, o, o + A)
+      , E = doesNanonautOverlapRobotAlongOneAxis(e, e + t, r, r + s);
     return N && E
 }
 
@@ -210,7 +210,7 @@ function draw() {
     c.font = "48px sans-serif",
     c.fillText(o.toFixed(0) + "m", 20, 40),
     c.font = "15px sans-serif",
-    c.fillText("Angry robots have Greater Speed >> causing more damage", 20, CANVAS_HEIGHT - 20),
+    c.fillText("Angry robots have Greater Speed and does more damage", 20, CANVAS_HEIGHT - 20),
     c.fillStyle = "blue",
     c.fillText("ROBOT ANGER Lvl: " + SPEEDANDDAMAGEMULTIPLYER_V.toFixed(0), 20, CANVAS_HEIGHT - 40),
     c.fillStyle = "red",
@@ -224,7 +224,7 @@ function draw() {
     c.font = "10px sans-serif",
     c.fillText("Mohammad Islam@2018", CANVAS_WIDTH - 120, CANVAS_HEIGHT - 10)
 }
-window.addEventListener("keydown", oKD),
-window.addEventListener("keyup", oKU),
+window.addEventListener("keydown", onKeyDown),
+window.addEventListener("keyup", onKeyUp),
 window.addEventListener("load", start),
 console.log("     NANONAUT PROJECT CRATED BY - MOHAMMAD ISLAM \nCreate using CoderDojo <NAND>\n    Create with <CODE>\n\n    MAKE YOUR OWN GAME\n---------------------------------------------------------\nSprites and gameidea by CoderDojo");
